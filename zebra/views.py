@@ -9,6 +9,7 @@ import stripe
 from zebra.conf import options
 from zebra.signals import *
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 import logging
 log = logging.getLogger("zebra.%s" % __name__)
@@ -25,14 +26,12 @@ def _try_to_get_customer_from_customer_id(stripe_customer_id):
     return None
 
 @csrf_exempt
+@require_POST
 def webhooks(request):
     """
     Handles all known webhooks from stripe, and calls signals.
     Plug in as you need.
     """
-
-    if request.method != "POST":
-        return HttpResponse("Invalid Request.", status=400)
 
     json = simplejson.loads(request.POST["json"])
 
@@ -60,13 +59,12 @@ def webhooks(request):
     return HttpResponse(status=200)
 
 @csrf_exempt
+@require_POST
 def webhooks_v2(request):
     """
     Handles all known webhooks from stripe, and calls signals.
     Plug in as you need.
     """
-    if request.method != "POST":
-        return HttpResponse("Invalid Request.", status=400)
 
     try:
         event_json = simplejson.loads(request.body)
